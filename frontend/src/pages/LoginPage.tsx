@@ -1,9 +1,7 @@
-"use client";
-
 import type React from "react";
-
 import { useState } from "react";
-import { useNavigate, Link } from "react-router"; 
+import { Link } from "react-router"; 
+import { useAuth } from "@/contexts/authContext"; 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,53 +16,56 @@ export default function AuthPage() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
-    const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false); // Local loading state for button
+    const { login, register } = useAuth(); // Get auth functions
+    // const navigate = useNavigate(); // Keep navigate if needed for other things
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+        setIsLoading(true); // Start loading
 
         if (!username || !password) {
             setError("Please fill in all fields");
+            setIsLoading(false);
             return;
         }
 
         if (!isLogin && password !== confirmPassword) {
             setError("Passwords do not match");
+            setIsLoading(false);
             return;
         }
 
-        // Here you would typically handle authentication with your backend
-        // For now, we'll just simulate a successful login/registration
-
-        console.log(isLogin ? "Logging in..." : "Registering...", {
-            username,
-            password,
-        });
-
-        // Redirect to home page after successful login/registration
-        navigate("/home");
+        try {
+            if (isLogin) {
+                await login({ username, password });
+                // Navigation is handled within the login function on success
+            } else {
+                await register({ username, password });
+                // Navigation is handled within the register function on success
+            }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (err: any) {
+            setError(
+                err.response?.data?.message || 
+                    err.message ||
+                    "Authentication failed"
+            );
+        } finally {
+            setIsLoading(false); // Stop loading
+        }
     };
 
     return (
-        // Added relative positioning to the main container for absolute positioning of the back button
         <div className="relative min-h-screen flex flex-col w-screen">
-            {/* Back Button - Positioned Top Left */}
-            <Link
+            {/* Back Button */}
+            <Link 
                 to="/"
                 className="absolute top-4 left-4 z-10 p-2 rounded-full bg-purple-500 text-white hover:bg-purple-600 transition-colors flex items-center gap-1 text-sm"
-                aria-label="Back to Home" // Added aria-label for accessibility
+                aria-label="Back to Landing"
             >
-                {/* Optional: Add an icon like a back arrow */}
-                {/* <span>Back</span> */}
-                <div className="relative">
-                        <img
-                            src={back}
-                            alt="ChatConcierge Logo"
-                            width={12}
-                            height={12}
-                        />
-                </div>
+                <img src={back} alt="Back" width={12} height={12} />
             </Link>
 
             {/* Header */}
@@ -89,7 +90,8 @@ export default function AuthPage() {
                 <Card className="w-full max-w-md bg-black text-white border-none shadow-xl">
                     <CardHeader className="text-center">
                         <h2 className="text-2xl font-semibold">
-                            Login or Register
+                            {isLogin ? "Login" : "Register"}{" "}
+                            {/* Dynamic Title */}
                         </h2>
                     </CardHeader>
 
@@ -98,7 +100,7 @@ export default function AuthPage() {
                             <div className="absolute inset-0 bg-black rounded-full flex items-center justify-center">
                                 <img
                                     src={planet}
-                                    alt="Planet Icon" // More descriptive alt text
+                                    alt="Planet Icon"
                                     width={72}
                                     height={72}
                                 />
@@ -108,6 +110,7 @@ export default function AuthPage() {
 
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-8">
+                            {/* Username Input */}
                             <div className="space-y-2">
                                 <Label
                                     htmlFor="username"
@@ -123,10 +126,12 @@ export default function AuthPage() {
                                         setUsername(e.target.value)
                                     }
                                     className="bg-gray-200 text-black h-12"
-                                    required // Added required attribute
+                                    required
+                                    disabled={isLoading} // Disable during loading
                                 />
                             </div>
 
+                            {/* Password Input */}
                             <div className="space-y-2">
                                 <Label
                                     htmlFor="password"
@@ -142,10 +147,12 @@ export default function AuthPage() {
                                         setPassword(e.target.value)
                                     }
                                     className="bg-gray-200 text-black h-12"
-                                    required // Added required attribute
+                                    required
+                                    disabled={isLoading} // Disable during loading
                                 />
                             </div>
 
+                            {/* Confirm Password Input (Register only) */}
                             {!isLogin && (
                                 <div className="space-y-2">
                                     <Label
@@ -162,39 +169,50 @@ export default function AuthPage() {
                                             setConfirmPassword(e.target.value)
                                         }
                                         className="bg-gray-200 text-black h-12"
-                                        required={!isLogin} // Required only when registering
+                                        required={!isLogin}
+                                        disabled={isLoading} // Disable during loading
                                     />
                                 </div>
                             )}
 
+                            {/* Error Message */}
                             {error && (
                                 <div className="text-red-400 text-sm">
                                     {error}
                                 </div>
                             )}
 
+                            {/* Submit Button */}
                             <div className="pt-4">
                                 <Button
                                     type="submit"
                                     className="w-full bg-purple-500 hover:bg-purple-600 text-white h-12"
+                                    disabled={isLoading} // Disable during loading
                                 >
-                                    {isLogin ? "Login" : "Register"}
+                                    {isLoading
+                                        ? "Processing..."
+                                        : isLogin
+                                        ? "Login"
+                                        : "Register"}
                                 </Button>
                             </div>
 
+                            {/* Toggle Login/Register */}
                             <div className="text-center">
                                 <button
                                     type="button"
-                                    onClick={() => setIsLogin(!isLogin)}
+                                    onClick={() => {
+                                        setIsLogin(!isLogin);
+                                        setError(""); // Clear error on toggle
+                                    }}
                                     className="text-purple-300 hover:text-purple-200 text-sm"
+                                    disabled={isLoading} // Disable during loading
                                 >
                                     {isLogin
                                         ? "Need an account? Register"
                                         : "Already have an account? Login"}
                                 </button>
                             </div>
-
-                            {/* Removed the Back to Home link from here */}
                         </form>
                     </CardContent>
                 </Card>
