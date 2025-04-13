@@ -14,19 +14,19 @@ The source code for this project is available in this repository.
 
 ## Demo Video
 
-[coming soon]
+https://www.youtube.com/watch?v=SL-DiNScX2w
 
 ## Team Information
 
-*   [Team Member 1 Name] - [Role]
-*   [Team Member 2 Name] - [Role]
-*   [Team Member 3 Name] - [Role]
+*   Austin Hedge - Backend
+*   Natalie Segura - Design
+*   Harprateek Jeyakannan - Design
 *   Jose Juan Gonzalez Jr - Frontend
 
 
 ## Track Selection
 
-This project is competing in the **Space** track.
+This project is competing in the **Adventure** track.
 
 ## Usage
 
