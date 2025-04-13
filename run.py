@@ -6,9 +6,6 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///travel.db'
 db.init_app(app)
 
-@app.route('/')
-def home():
-    return "Hello World"
 
 if __name__ == '__main__':
     with app.app_context():
