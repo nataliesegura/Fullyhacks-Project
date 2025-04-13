@@ -1,5 +1,5 @@
 from models import db
-from run import app
+from app import app
 
 def create_test_data():
     with app.app_context():

@@ -1,37 +1,78 @@
+# from cerebras.cloud.sdk import Cerebras
+
+# api_key = 'csk-9h6k63fcct83wvjcjenteyec4c56jvxe9npnyjhv9ypdvkkp'
+
+# def generate_response():
+#     try:
+#         if not api_key:
+#             raise ValueError("CEREBRAS_API_KEY is not set.")
+
+#         client = Cerebras(api_key=api_key)
+
+#         stream = client.chat.completions.create(
+#         messages=[
+#             {
+#                 "role": "user",
+#                 "content": f"""say helllllooooo"""
+#             }
+#         ],
+#         model="llama-4-scout-17b-16e-instruct",
+#         stream=True,
+#     )
+
+#     # Just the assistant's answer
+#         full_response = ""
+#         for chunk in stream:
+#             content = chunk.choices[0].delta.content or ""
+#             full_response += content
+#         print(full_response)
+#         return full_response
+
+#     except ValueError as ve:
+#         print(f"[Environment Error] {ve}")
+
+#     except Exception as e:
+#         print(f"[Unexpected Error] {e}")
+
+# generate_response()
+
 from cerebras.cloud.sdk import Cerebras
 
 api_key = 'csk-9h6k63fcct83wvjcjenteyec4c56jvxe9npnyjhv9ypdvkkp'
 
-def generate_response():
+def generate_response(prompt: str):
     try:
-        if not api_key:
-            raise ValueError("CEREBRAS_API_KEY is not set.")
-
         client = Cerebras(api_key=api_key)
 
         stream = client.chat.completions.create(
-        messages=[
-            {
-                "role": "user",
-                "content": f"""say helllllooooo"""
-            }
-        ],
-        model="llama-4-scout-17b-16e-instruct",
-        stream=True,
-    )
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,  
+                }
+            ],
+            model="llama-4-scout-17b-16e-instruct", 
+            stream=True,
+            max_tokens=150, 
+            temperature=0.7,  
+        )
 
-    # Just the assistant's answer
         full_response = ""
         for chunk in stream:
             content = chunk.choices[0].delta.content or ""
             full_response += content
-        print(full_response)    
-        return full_response
+
+        print(
+            f"Cerebras Response for prompt '{prompt[:50]}...':\n{full_response}"
+        )  
+        return full_response.strip() 
 
     except ValueError as ve:
-        print(f"[Environment Error] {ve}")
+        print(f"[Environment/Config Error] {ve}")
+        raise ConnectionError(f"Cerebras API Error: {ve}") from ve
 
     except Exception as e:
-        print(f"[Unexpected Error] {e}")
+        print(f"[Cerebras API Error] {e}")
+        raise ConnectionError(f"Cerebras API Error: {e}") from e
 
-generate_response()
+
