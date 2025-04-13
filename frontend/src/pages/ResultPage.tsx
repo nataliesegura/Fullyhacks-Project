@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home, Users, MapPin, AlertTriangle } from "lucide-react"; // Added icons
 import UFO from "@/assets/ufo.svg";
+import ReactMarkdown from "react-markdown";
 
 interface Attraction {
     name: string;
@@ -208,7 +209,7 @@ export default function ResultPage() {
                                                     AI Suggestions:
                                                 </h3>
                                                 {/* Basic parsing assuming newline separation */}
-                                                <ul className="space-y-2 text-black text-lg list-disc list-inside">
+                                                {/* <ul className="space-y-2 text-black text-lg list-disc list-inside">
                                                     {result.ai_suggestion
                                                         .split("\n")
                                                         .map(
@@ -228,7 +229,14 @@ export default function ResultPage() {
                                                                     </li>
                                                                 )
                                                         )}
-                                                </ul>
+                                                </ul> */}
+                                                <div className="prose prose-sm text-black text-lg">
+                                                    {" "}
+                                                    {/* Optional: Add prose class for basic styling */}
+                                                    <ReactMarkdown>
+                                                        {result.ai_suggestion}
+                                                    </ReactMarkdown>
+                                                </div>
                                             </>
                                         ) : (
                                             <>
